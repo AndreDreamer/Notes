@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_height="80dp"
+    android:layout_width="80dp">
+
+    <item
+        android:id="@+id/dropdown_menu1"
+        android:title="delete"
+        android:visible="true" />
+    <item
+        android:id="@+id/dropdown_menu2"
+        android:title="info"
+        android:visible="true" />
+
+
+</menu>
