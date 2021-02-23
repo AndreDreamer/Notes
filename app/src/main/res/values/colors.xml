@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#FFF585</color>
-    <color name="colorPrimaryDark">#fdee44</color>
-    <color name="colorAccent">#fdee44</color>
-    <color name="colorGray">#9f9f9f</color>
+    <color name="colorPrimary">#464A51</color>
+    <color name="colorPrimaryDark">#464A51</color>
+    <color name="colorAccent">#FDD369</color>
+    <color name="titleButtonTextColor">#fff</color>
     <color name="colorFont">#454545</color>
+    <color name="mainBack">#F6F4E6</color>
+    <color name = "transparent">#00000000</color>
 </resources>
