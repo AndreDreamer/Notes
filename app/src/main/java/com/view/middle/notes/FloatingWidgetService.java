@@ -1,10 +1,8 @@
 package com.view.middle.notes;
 
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.PixelFormat;
-import android.opengl.Visibility;
 import android.os.IBinder;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -43,27 +41,37 @@ public class FloatingWidgetService extends Service {
         buttonOK = mFloatingView.findViewById(R.id.buttonOKFlow);
         title = mFloatingView.findViewById(R.id.editTitleFlow);
         text = mFloatingView.findViewById(R.id.editTextFlow);
-        //create note
 
-      final int LayoutParamFlags = WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
-                | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
-                ;
 
-        //Add the view to the window.
-        final WindowManager.LayoutParams params = new WindowManager.LayoutParams(
+        final WindowManager.LayoutParams params1 = new WindowManager.LayoutParams(
                 WindowManager.LayoutParams.WRAP_CONTENT,
                 WindowManager.LayoutParams.WRAP_CONTENT,
-                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY , LayoutParamFlags,
+                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY ,WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
+                | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
                 PixelFormat.TRANSLUCENT);
 
+        //Add the view to the window.
+        final WindowManager.LayoutParams params2 = new WindowManager.LayoutParams(
+                WindowManager.LayoutParams.WRAP_CONTENT,
+                WindowManager.LayoutParams.WRAP_CONTENT,
+                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY ,WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
+                | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                PixelFormat.TRANSLUCENT);
+
+
+        params1.gravity = Gravity.TOP | Gravity.LEFT;        //Initially view will be added to top-left corner
+        params1.x = 0;
+        params1.y = 100;
+
         //Specify the view position
-        params.gravity = Gravity.TOP | Gravity.LEFT;        //Initially view will be added to top-left corner
-        params.x = 0;
-        params.y = 100;
+        params2.gravity = Gravity.TOP | Gravity.LEFT;        //Initially view will be added to top-left corner
+        params2.x = 0;
+        params2.y = 100;
 
         //Add the view to the window
         mWindowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
-        mWindowManager.addView(mFloatingView, params);
+        mWindowManager.addView(mFloatingView, params1);
+
 
         //The root element of the collapsed view layout
         final View collapsedView = mFloatingView.findViewById(R.id.collapse_view);
@@ -79,6 +87,7 @@ public class FloatingWidgetService extends Service {
                 createNote();
                 collapsedView.setVisibility(View.VISIBLE);
                 expandedView.setVisibility(View.GONE);
+                mWindowManager.updateViewLayout(mFloatingView,params1 );
 
             }
         });
@@ -109,8 +118,10 @@ public class FloatingWidgetService extends Service {
                     case MotionEvent.ACTION_DOWN:
 
                         //remember the initial position.
-                        initialX = params.x;
-                        initialY = params.y;
+                        initialX = params1.x;
+                        initialY = params1.y;
+                        initialX = params2.x;
+                        initialY = params2.y;
 
                         //get the touch location
                         initialTouchX = event.getRawX();
@@ -125,22 +136,24 @@ public class FloatingWidgetService extends Service {
                         //So that is click event.
                         if (Xdiff < 10 && Ydiff < 10) {
                             if (isViewCollapsed()) {
-                                //When user clicks on the image view of the collapsed layout,
-                                //visibility of the collapsed layout will be changed to "View.GONE"
-                                //and expanded view will become visible.
                                 collapsedView.setVisibility(View.GONE);
                                 expandedView.setVisibility(View.VISIBLE);
+                                mWindowManager.updateViewLayout(mFloatingView,params2 );
                             }
                         }
                         return true;
                     case MotionEvent.ACTION_MOVE:
                         //Calculate the X and Y coordinates of the view.
-                        params.x = initialX + (int) (event.getRawX() - initialTouchX);
-                        params.y = initialY + (int) (event.getRawY() - initialTouchY);
 
+                        params1.x = initialX + (int) (event.getRawX() - initialTouchX);
+                        params1.y = initialY + (int) (event.getRawY() - initialTouchY);
+
+                        params2.x = initialX + (int) (event.getRawX() - initialTouchX);
+                        params2.y = initialY + (int) (event.getRawY() - initialTouchY);
 
                         //Update the layout with new X & Y coordinate
-                        mWindowManager.updateViewLayout(mFloatingView, params);
+                        mWindowManager.updateViewLayout(mFloatingView, params1);
+
                         return true;
                 }
                 return false;
@@ -159,9 +172,11 @@ public class FloatingWidgetService extends Service {
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
 
-                        //remember the initial position.
-                        initialX = params.x;
-                        initialY = params.y;
+
+                        initialX = params1.x;
+                        initialY = params1.y;
+                        initialX = params2.x;
+                        initialY = params2.y;
 
                         //get the touch location
                         initialTouchX = event.getRawX();
@@ -181,17 +196,21 @@ public class FloatingWidgetService extends Service {
                                 //and expanded view will become visible.
                                 collapsedView.setVisibility(View.GONE);
                                 expandedView.setVisibility(View.VISIBLE);
+                                mWindowManager.updateViewLayout(mFloatingView,params1 );
                             }
                         }
                         return true;
                     case MotionEvent.ACTION_MOVE:
                         //Calculate the X and Y coordinates of the view.
-                        params.x = initialX + (int) (event.getRawX() - initialTouchX);
-                        params.y = initialY + (int) (event.getRawY() - initialTouchY);
+                        params1.x = initialX + (int) (event.getRawX() - initialTouchX);
+                        params1.y = initialY + (int) (event.getRawY() - initialTouchY);
+                        params2.x = initialX + (int) (event.getRawX() - initialTouchX);
+                        params2.y = initialY + (int) (event.getRawY() - initialTouchY);
 
 
                         //Update the layout with new X & Y coordinate
-                        mWindowManager.updateViewLayout(mFloatingView, params);
+
+                        mWindowManager.updateViewLayout(mFloatingView,params2 );
                         return true;
                 }
                 return false;
@@ -215,13 +234,6 @@ public class FloatingWidgetService extends Service {
         title.setText("");
     }
 
-
-
-    /**
-     * Detect if the floating view is collapsed or expanded.
-     *
-     * @return true if the floating view is collapsed.
-     */
     private boolean isViewCollapsed() {
         return mFloatingView == null || mFloatingView.findViewById(R.id.collapse_view).getVisibility() == View.VISIBLE;
     }
