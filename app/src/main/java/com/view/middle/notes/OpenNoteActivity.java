@@ -2,20 +2,25 @@ package com.view.middle.notes;
 
 import android.app.Activity;
 
+import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 
 public class OpenNoteActivity extends Activity {
     EditText title;
     EditText text;
     int index;
-
+    static boolean active = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        active = true;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.open_note);
         title = findViewById(R.id.editTitle);
@@ -37,7 +42,15 @@ public class OpenNoteActivity extends Activity {
                 finish();
             }
         });
+    removeService();
     }
+
+    private void removeService(){
+        {
+            stopService(new Intent(OpenNoteActivity.this, FloatingWidgetService.class));
+        }
+    }
+
 
     @Override
     public void finish() {
@@ -56,8 +69,35 @@ public class OpenNoteActivity extends Activity {
             }
             MainActivity.db.putNotes(MainActivity.notes);
         }
+
+            Intent myIntent = new Intent(this, MainActivity.class);
+            myIntent.putExtra("NoteID", -1);
+            startActivity(myIntent);
         super.finish();
 
+    }
+    @Override
+    protected void onResume(){
+        super.onResume();
+    active = true;
+        removeService();
+    }
+
+    @Override protected void onStop(){
+        super.onStop();
+        active = false;
+        if(!MainActivity.active && !OpenNoteActivity.active) {
+            // To prevent starting the service if the required permission is NOT granted.
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M || Settings.canDrawOverlays(this)) {
+                startService(new Intent(OpenNoteActivity.this, FloatingWidgetService.class).putExtra("activity_background", true));
+
+            } else {
+                errorToast();
+            }
+        }
+    }
+    private void errorToast() {
+        Toast.makeText(this, "Draw over other app permission not available. Can't start the application without the permission.", Toast.LENGTH_LONG).show();
     }
 
 
