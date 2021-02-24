@@ -27,8 +27,8 @@ public class OpenNoteActivity extends Activity {
         text = findViewById(R.id.editText);
         index = getIntent().getIntExtra("NoteID", 0);
         if (index == -1) {
-            title.setText("Edit title");
-            text.setText("Put notes");
+            title.setHint("Edit title");
+            text.setHint("Put notes");
         } else {
             Note note = MainActivity.notes.get(index);
             title.setText(note.title);
